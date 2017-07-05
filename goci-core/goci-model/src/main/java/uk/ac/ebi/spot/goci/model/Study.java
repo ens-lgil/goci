@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
+import javax.persistence.metamodel.StaticMetamodel;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,6 +23,7 @@ import java.util.Date;
  */
 
 @Entity
+@StaticMetamodel(Study.class)
 public class Study implements Trackable {
     @Id
     @GeneratedValue

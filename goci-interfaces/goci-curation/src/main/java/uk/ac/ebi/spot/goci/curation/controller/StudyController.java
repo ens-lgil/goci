@@ -51,17 +51,7 @@ import uk.ac.ebi.spot.goci.model.Housekeeping;
 import uk.ac.ebi.spot.goci.model.Platform;
 import uk.ac.ebi.spot.goci.model.Study;
 import uk.ac.ebi.spot.goci.model.UnpublishReason;
-import uk.ac.ebi.spot.goci.repository.AssociationRepository;
-import uk.ac.ebi.spot.goci.repository.CurationStatusRepository;
-import uk.ac.ebi.spot.goci.repository.CuratorRepository;
-import uk.ac.ebi.spot.goci.repository.DiseaseTraitRepository;
-import uk.ac.ebi.spot.goci.repository.EfoTraitRepository;
-import uk.ac.ebi.spot.goci.repository.AncestryRepository;
-import uk.ac.ebi.spot.goci.repository.GenotypingTechnologyRepository;
-import uk.ac.ebi.spot.goci.repository.HousekeepingRepository;
-import uk.ac.ebi.spot.goci.repository.PlatformRepository;
-import uk.ac.ebi.spot.goci.repository.StudyRepository;
-import uk.ac.ebi.spot.goci.repository.UnpublishReasonRepository;
+import uk.ac.ebi.spot.goci.repository.*;
 import uk.ac.ebi.spot.goci.service.DefaultPubMedSearchService;
 import uk.ac.ebi.spot.goci.service.exception.PubmedLookupException;
 
@@ -166,8 +156,9 @@ public class StudyController {
     }
 
     /* All studies and various filtered lists */
-    @RequestMapping(produces = MediaType.TEXT_HTML_VALUE, method = RequestMethod.GET)
+    @RequestMapping(produces = MediaType.TEXT_HTML_VALUE, method = {RequestMethod.POST, RequestMethod.GET})
     public String allStudiesPage(Model model,
+                                 @ModelAttribute StudySearchFilter studySearchFilter,
                                  @RequestParam(required = false) Integer page,
                                  @RequestParam(required = false) String pubmed,
                                  @RequestParam(required = false) String author,
@@ -183,8 +174,14 @@ public class StudyController {
 
 
         // This is passed back to model and determines if pagination is applied
+        System.out.println("ciao guy");
         Boolean pagination = true;
+        Study example = new Study();
+        //example.setTitle("individuals");
+        example.setAuthor("van der Harst P");
+        StudySpecifications studyspec = new StudySpecifications(example);
 
+        List<Study> persons = studyRepository.findAll(studyspec);
         // Return all studies ordered by date if no page number given
         if (page == null) {
             // Find all studies ordered by study date and only display first page
@@ -192,7 +189,7 @@ public class StudyController {
         }
 
         // This will be returned to view and store what curator has searched for
-        StudySearchFilter studySearchFilter = new StudySearchFilter();
+        StudySearchFilter studySearchFilter2 = new StudySearchFilter();
 
         // Store filters which will be need for pagination bar and to build URI passed back to view
         String filters = "";
@@ -523,98 +520,13 @@ public class StudyController {
 
 
     // Redirects from landing page and main page
-    @RequestMapping(produces = MediaType.TEXT_HTML_VALUE, method = RequestMethod.POST)
-    public String searchForStudyByFilter(@ModelAttribute StudySearchFilter studySearchFilter,
-                                         @RequestParam(value = "sorttype", required = false) String sortType,
-                                         @RequestParam(value = "scoreJSON", required = false) String scoreJSON,
-                                         @RequestParam(required = false) Integer page) {
 
-        // Get ids of objects searched for
-        Long status = studySearchFilter.getStatusSearchFilterId();
-        Long curator = studySearchFilter.getCuratorSearchFilterId();
-        String pubmedId = studySearchFilter.getPubmedId();
-        String author = studySearchFilter.getAuthor();
-        String studyType = studySearchFilter.getStudyType();
-        Long efoTraitId = studySearchFilter.getEfoTraitSearchFilterId();
-        String notesQuery = studySearchFilter.getNotesQuery();
-        Long diseaseTraitId = studySearchFilter.getDiseaseTraitSearchFilterId();
-        Integer goToPage;
-        System.out.println(studySearchFilter.toString());
-        System.out.println(status);
-        if (page == null) {
-            goToPage = 1;
-        }
-        else {
-            goToPage = page;
-        }
+    public String searchForStudyByFilter(StudySearchFilter studySearchFilter) {
 
-        if (sortType !=null) {
-            this.setScoreJsonNode(convertScoreJson(scoreJSON));
-        }
-        else {
-            this.setScoreJsonNode(convertScoreJson(null));
-        }
+        System.out.println("ciao!");
+        System.out.println("skyfall");
 
-        // Search by pubmed ID option available from landing page
-        if (pubmedId != null && !pubmedId.isEmpty()) {
-            return "redirect:/studies?page=1&pubmed=" + pubmedId;
-        }
-
-        // Search by author option available from landing page
-        else if (author != null && !author.isEmpty()) {
-            return "redirect:/studies?page=1&author=" + author;
-        }
-
-        // Search by study type
-        else if (studyType != null && !studyType.isEmpty()) {
-            return "redirect:/studies?page=1&studytype=" + studyType;
-        }
-
-        // Search by efo trait
-        else if (efoTraitId != null) {
-            return "redirect:/studies?page=1&efotraitid=" + efoTraitId;
-        }
-
-        // Search by disease trait
-        else if (diseaseTraitId != null) {
-            return "redirect:/studies?page=1&diseasetraitid=" + diseaseTraitId;
-        }
-
-        // Search by string in notes
-        else if (notesQuery != null && !notesQuery.isEmpty()) {
-            return "redirect:/studies?page=1&notesquery=" + notesQuery;
-        }
-
-        // If user entered a status
-        else if (status != null) {
-            // If we have curator and status find by both
-            if (curator != null) {
-                return "redirect:/studies?page=1&status=" + status + "&curator=" + curator;
-            }
-            else {
-                String redirect = "redirect:/studies?page=1&status=" + status;
-                if (sortType !=null) {
-                    redirect = "redirect:/studies?page="+goToPage.toString()+"&status=" + status+"&sorttype="+sortType;
-                }
-                return redirect;
-            }
-        }
-        // If user entered curator
-        else if (curator != null) {
-            return "redirect:/studies?page=1&curator=" + curator;
-        }
-
-        // If all else fails return all studies
-        else {
-            if (sortType !=null) {
-                return "redirect:/studies?page="+goToPage.toString()+"&sorttype="+sortType;
-            }
-            else {
-                // Find all studies ordered by study date and only display first page
-                return "redirect:/studies?page=1";
-            }
-        }
-
+        return "ciao";
     }
 
 
